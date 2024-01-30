@@ -1,13 +1,7 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 
 const Modal = ({ imageUrl, onClose }) => {
-  const handleBackdropClick = evt => {
-    if (evt.currentTarget === evt.target) {
-      onClose();
-    }
-  };
-
   useEffect(() => {
     const handleKeydown = evt => {
       if (evt.code === 'Escape') {
@@ -21,6 +15,11 @@ const Modal = ({ imageUrl, onClose }) => {
     };
   }, [onClose]);
 
+  const handleBackdropClick = evt => {
+    if (evt.currentTarget === evt.target) {
+      onClose();
+    }
+  };
   return (
     <div className="Overlay" onMouseDown={handleBackdropClick}>
       <div className="Modal">

@@ -6,60 +6,53 @@ import Button from './Button/Button';
 import fetchImg from './helpers/api';
 
 const App = () => {
-  const [galleryData, setGalleryData] = useState({
-    images: [],
-    page: 1,
-    totalHits: 0,
-  });
+  const [gallery, setGallery] = useState([]);
+  const [page, setPage] = useState(1);
   const [textFind, setTextFind] = useState('');
-  const [perPage] = useState(12);
   const [isLoad, setIsLoad] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
+  const perPage = 12;
 
   const handleTextSubmit = value => {
     if (!value) return;
 
+    setGallery([]);
+    setPage(1);
     setTextFind(value);
-    setGalleryData({ images: [], page: 1, totalHits: 0 });
+    setIsLoad(false);
+    setTotalHits(0);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!textFind) return;
+    if (!textFind) return;
 
-      setIsLoad(true);
-
-      try {
-        const data = await fetchImg(galleryData.page, textFind, perPage);
-        setGalleryData(prevData => ({
-          images: [...prevData.images, ...data.hits],
-          page: prevData.page + 1,
-          totalHits: data.totalHits,
-        }));
-      } catch (error) {
-        console.error('API Error:', error);
-      } finally {
+    setIsLoad(true);
+    fetchImg(page, textFind, perPage)
+      .then(data => {
+        setGallery(prev => [...prev, ...data.hits]);
+        setTotalHits(data.totalHits);
+      })
+      .catch(e => console.error('API Error:', e))
+      .finally(() => {
         setIsLoad(false);
-      }
-    };
-
-    fetchData();
-  }, [galleryData.page, perPage, textFind]);
+      });
+  }, [textFind, page]);
 
   const handleLoadMore = () => {
+    setPage(page + 1);
     setIsLoad(true);
   };
 
   return (
     <div className="App">
       <Searchbar onSubmit={handleTextSubmit} />
-      <ImageGallery data={galleryData.images} />
+      <ImageGallery data={gallery} />
       {isLoad && <Loader />}
-      {galleryData.images.length > 0 &&
-        galleryData.totalHits > galleryData.page * perPage &&
-        !isLoad && <Button onClick={handleLoadMore} />}
+      {gallery.length > 0 && totalHits > page * perPage && !isLoad && (
+        <Button onClick={handleLoadMore} />
+      )}
     </div>
   );
 };
-
 
 export default App;

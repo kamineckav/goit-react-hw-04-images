@@ -2,19 +2,17 @@ import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import PropTypes from 'prop-types';
 
 const ImageGallery = ({ data }) => {
-  const renderImages = () => {
-    return data.map(({ id, webformatURL, user, largeImageURL }) => (
-      <ImageGalleryItem
-        key={id}
-        id={id}
-        webformatURL={webformatURL}
-        user={user}
-        largeImageURL={largeImageURL}
-      />
-    ));
-  };
+  const images = data.map(({ id, webformatURL, user, largeImageURL }) => (
+    <ImageGalleryItem
+      key={id}
+      id={id}
+      webformatURL={webformatURL}
+      user={user}
+      largeImageURL={largeImageURL}
+    />
+  ));
 
-  return <ul className="ImageGallery">{renderImages()}</ul>;
+  return <ul className="ImageGallery">{images}</ul>;
 };
 
 ImageGallery.propTypes = {

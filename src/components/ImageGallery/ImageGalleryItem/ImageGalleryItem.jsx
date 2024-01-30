@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import Modal from 'components/Modal/Modal';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-const ImageGalleryItem = ({ id, webformatURL, user }) => {
+const ImageGalleryItem = ({ user, webformatURL, id, largeImageURL }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -16,7 +16,7 @@ const ImageGalleryItem = ({ id, webformatURL, user }) => {
   return (
     <li className="ImageGalleryItem" id={id} onClick={handleOpenModal}>
       <img src={webformatURL} alt={user} className="ImageGalleryItem-image" />
-      {isOpen && <Modal imageUrl={webformatURL} onClose={handleCloseModal} />}
+      {isOpen && <Modal imageUrl={largeImageURL} onClose={handleCloseModal} />}
     </li>
   );
 };
