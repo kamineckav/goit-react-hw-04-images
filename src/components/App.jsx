@@ -1,73 +1,65 @@
+import { useState, useEffect } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
-import { Component } from 'react';
 import fetchImg from './helpers/api';
 
-class App extends Component {
-  state = {
-    gallery: [],
+const App = () => {
+  const [galleryData, setGalleryData] = useState({
+    images: [],
     page: 1,
-    textFind: '',
-    perPage: 12,
-    isLoad: false,
     totalHits: 0,
-  };
+  });
+  const [textFind, setTextFind] = useState('');
+  const [perPage] = useState(12);
+  const [isLoad, setIsLoad] = useState(false);
 
-  handleTextSubmit = value => {
+  const handleTextSubmit = value => {
     if (!value) return;
 
-    this.setState({
-      textFind: value,
-      gallery: [],
-      page: 1,
-      isLoad: false,
-      totalHits: 0,
-    });
+    setTextFind(value);
+    setGalleryData({ images: [], page: 1, totalHits: 0 });
   };
 
-  componentDidUpdate(_, prevState) {
-    if (
-      prevState.textFind !== this.state.textFind ||
-      prevState.page !== this.state.page
-    ) {
-      const selectPage = this.state.page;
-      this.setState({ isLoad: true });
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!textFind) return;
 
-      fetchImg(selectPage, this.state.textFind, this.state.perPage)
-        .then(data => {
-          this.setState(prev => ({
-            gallery: [...prev.gallery, ...data.hits],
-            page: selectPage,
-            totalHits: data.totalHits,
-          }));
-        })
-        .catch(e => console.error('API Error:', e))
-        .finally(() => {
-          this.setState({ isLoad: false });
-        });
-    }
-  }
+      setIsLoad(true);
 
-  handleLoadMore = () => {
-    this.setState(prev => ({ page: prev.page + 1, isLoad: true }));
+      try {
+        const data = await fetchImg(galleryData.page, textFind, perPage);
+        setGalleryData(prevData => ({
+          images: [...prevData.images, ...data.hits],
+          page: prevData.page + 1,
+          totalHits: data.totalHits,
+        }));
+      } catch (error) {
+        console.error('API Error:', error);
+      } finally {
+        setIsLoad(false);
+      }
+    };
+
+    fetchData();
+  }, [galleryData.page, perPage, textFind]);
+
+  const handleLoadMore = () => {
+    setIsLoad(true);
   };
 
-  render() {
-    const { isLoad, gallery, totalHits, page, perPage } = this.state;
+  return (
+    <div className="App">
+      <Searchbar onSubmit={handleTextSubmit} />
+      <ImageGallery data={galleryData.images} />
+      {isLoad && <Loader />}
+      {galleryData.images.length > 0 &&
+        galleryData.totalHits > galleryData.page * perPage &&
+        !isLoad && <Button onClick={handleLoadMore} />}
+    </div>
+  );
+};
 
-    return (
-      <div className="App">
-        <Searchbar onSubmit={this.handleTextSubmit} />
-        <ImageGallery data={gallery} />
-        {isLoad && <Loader />}
-        {gallery.length > 0 && totalHits > page * perPage && !isLoad && (
-          <Button onClick={this.handleLoadMore} />
-        )}
-      </div>
-    );
-  }
-}
 
 export default App;
